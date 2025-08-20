@@ -1,9 +1,9 @@
-name: Terraform Pipeline
+name: Terraform Destroy Pipeline
 
 on:
   push:
     branches:
-    - main
+      - main
 
 env:
   TERRAFORM_VERSION: 1.13.0
@@ -11,15 +11,15 @@ env:
 jobs:
 
   tf-aws:
-    name: AWS provider
+    name: AWS provider - Destroy Infrastructure
     runs-on: ubuntu-latest
- 
+
     steps:
 
     - name: Step 01 - Terraform Setup
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: $TERRAFORM_VERSION
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
 
     - name: Step 02 - CheckOut GitHub Repo
       uses: actions/checkout@v4
@@ -27,22 +27,22 @@ jobs:
     - name: Step 03 - Authenticate with AWS
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id    : ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token    : ${{ secrets.AWS_SESSION_TOKEN }}
-        aws-region           : us-east-1
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: us-east-1
 
     - name: Step 04 - Terraform Init
-      run : terraform -chdir=./terraform init
+      run: terraform -chdir=./terraform init
 
     - name: Step 05 - Terraform Validate
-      run : terraform -chdir=./terraform validate
+      run: terraform -chdir=./terraform validate
 
-    - name: Step 06 - Terraform Plan
-      run : terraform -chdir=./terraform plan -out tfplan
+    - name: Step 06 - Terraform Plan Destroy
+      run: terraform -chdir=./terraform plan -destroy -out=tfplan
 
-    - name: Step 07 - Terraform Apply
-      run : terraform -chdir=./terraform apply tfplan
+    - name: Step 07 - Terraform Apply Destroy
+      run: terraform -chdir=./terraform apply tfplan
 
     - name: Step 08 - Terraform Show
-      run : terraform -chdir=./terraform show
+      run: terraform -chdir=./terraform show
