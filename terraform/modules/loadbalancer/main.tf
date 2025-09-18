@@ -1,44 +1,27 @@
-# EC2 Instances
+# EC2 INSTANCES
+data "template_file" "user_data" {
+  template = var.user_data
+}
+
 resource "aws_instance" "instance_1a" {
-  ami                    = var.ami
-  instance_type          = var.instance_type
+  ami                    = "ami-00a929b66ed6e0de6"
+  instance_type          = "t2.micro"
   subnet_id              = var.subnets[0]
   vpc_security_group_ids = [var.security_group_id]
-  user_data_base64       = base64encode(var.user_data)
-  key_name               = var.key_name
+  user_data_base64       = base64encode(data.template_file.user_data.rendered)
+  key_name               = "vockey"
 }
 
 resource "aws_instance" "instance_1b" {
-  ami                    = var.ami
-  instance_type          = var.instance_type
+  ami                    = "ami-00a929b66ed6e0de6"
+  instance_type          = "t2.micro"
   subnet_id              = var.subnets[1]
   vpc_security_group_ids = [var.security_group_id]
-  user_data_base64       = base64encode(var.user_data)
-  key_name               = var.key_name
+  user_data_base64       = base64encode(data.template_file.user_data.rendered)
+  key_name               = "vockey"
 }
 
-# Target Group
-resource "aws_lb_target_group" "ec2_lb_tg" {
-  name     = "ec2-lb-tg"
-  protocol = "HTTP"
-  port     = 80
-  vpc_id   = var.vpc_id
-}
-
-# Attach Instances
-resource "aws_lb_target_group_attachment" "tg_instance_1a" {
-  target_group_arn = aws_lb_target_group.ec2_lb_tg.arn
-  target_id        = aws_instance.instance_1a.id
-  port             = 80
-}
-
-resource "aws_lb_target_group_attachment" "tg_instance_1b" {
-  target_group_arn = aws_lb_target_group.ec2_lb_tg.arn
-  target_id        = aws_instance.instance_1b.id
-  port             = 80
-}
-
-# Load Balancer
+# LOAD BALANCER
 resource "aws_lb" "ec2_lb" {
   name               = "ec2-lb"
   load_balancer_type = "application"
@@ -46,8 +29,28 @@ resource "aws_lb" "ec2_lb" {
   security_groups    = [var.security_group_id]
 }
 
-# Listener
-resource "aws_lb_listener" "ec2_lb_listener" {
+# TARGET GROUP
+resource "aws_lb_target_group" "ec2_lb_tg" {
+  name     = "ec2-lb-tg"
+  protocol = "HTTP"
+  port     = 80
+  vpc_id   = var.vpc_id
+}
+
+resource "aws_lb_target_group_attachment" "tg_1a" {
+  target_group_arn = aws_lb_target_group.ec2_lb_tg.arn
+  target_id        = aws_instance.instance_1a.id
+  port             = 80
+}
+
+resource "aws_lb_target_group_attachment" "tg_1b" {
+  target_group_arn = aws_lb_target_group.ec2_lb_tg.arn
+  target_id        = aws_instance.instance_1b.id
+  port             = 80
+}
+
+# LISTENER
+resource "aws_lb_listener" "lb_listener" {
   load_balancer_arn = aws_lb.ec2_lb.arn
   port              = 80
   protocol          = "HTTP"

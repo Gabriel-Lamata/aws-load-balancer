@@ -1,4 +1,5 @@
+# Referência ao output do módulo de loadbalancer
 output "lb_url" {
-    value = "http://${aws_lb.ec2_lb.dns_name}"
-    description = "URL pública do Load Balancer"
+  value       = module.loadbalancer.lb_url
+  description = "URL pública do Load Balancer"
 }
