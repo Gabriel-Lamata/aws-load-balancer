@@ -84,7 +84,7 @@ jobs:
         run: terraform -chdir=./terraform init
 
       - name: Step 05 - Terraform Plan
-        run: terraform -chdir=./terraform plan -out=tfplan
+        run: terraform -chdir=./terraform plan -destroy -out=tfplan
         continue-on-error: true
 
       - name: Step 06 - Terraform Apply
